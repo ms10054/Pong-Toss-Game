@@ -1,0 +1,2 @@
+This is the GitHub repository for our Digital Logic & Design Project titled as "Pong Toss Game". Our team consists of 4 members, Muhammad Saad, Krish Kumar, Muhammad Abdullah Siddiqui, and Syed Zaid Naqvi.
+The motivation for this project was to create a fun, physical game that demonstrates core principles of digital logic design, sensor interfacing, and real-time displaycontrol. The Pong Toss Game challenges players' accuracy while providing immediate feedback through both physical seven-segment displays and a VGA monitor.
