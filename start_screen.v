@@ -1,26 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 11/17/2025 01:38:17 PM
-// Design Name: 
-// Module Name: start_screen
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
-`timescale 1ns / 1ps
 
 module start_screen(
     input clk_d, // pixel clock
@@ -32,15 +10,59 @@ module start_screen(
     output reg [3:0] blue=0
 );
 
+// Helper function to check if point is inside a trapezoid cup
+function in_cup;
+    input [9:0] px, py;
+    input [9:0] top_left, top_right, bottom_left, bottom_right, top_y, bottom_y;
+    reg [9:0] left_edge, right_edge;
+    begin
+        if (py >= top_y && py <= bottom_y) begin
+            // Calculate left and right edges at current y position (linear interpolation)
+            left_edge = top_left + ((bottom_left - top_left) * (py - top_y)) / (bottom_y - top_y);
+            right_edge = top_right + ((bottom_right - top_right) * (py - top_y)) / (bottom_y - top_y);
+            in_cup = (px >= left_edge && px <= right_edge);
+        end else begin
+            in_cup = 0;
+        end
+    end
+endfunction
+
 always @(posedge clk_d) begin
     if (video_on) begin
-        // Default color (black) during visible region
+        // Default color (cyan background) during visible region
         red <= 4'h0;
-        green <= 4'h0;
-        blue <= 4'h0;
+        green <= 4'hF;
+        blue <= 4'hF;
 
-        // Conditions for displaying text pattern
-        if(
+        // LEFT CUP - Red solo cup (solid filled trapezoid)
+        if (in_cup(pixel_x, pixel_y, 40, 90, 50, 80, 50, 150)) begin
+            // Red cup body (filled trapezoid)
+            red <= 4'hF; 
+            green <= 4'h0; 
+            blue <= 4'h0;
+        end
+        
+        // RIGHT CUP - Blue cup pointing upwards (solid filled trapezoid) - bottom right above "GAME"
+        else if (in_cup(pixel_x, pixel_y, 550, 600, 560, 590, 250, 350)) begin
+            // Blue cup body (filled trapezoid pointing up)
+            red <= 4'h0; 
+            green <= 4'h5; 
+            blue <= 4'hF;
+        end
+        
+        // WHITE BALL over the blue cup
+        else if (
+            // Circle equation: (x-center_x)^2 + (y-center_y)^2 <= radius^2
+            ((pixel_x - 575) * (pixel_x - 575) + (pixel_y - 220) * (pixel_y - 220) <= 225)
+        ) begin
+            // White ball
+            red <= 4'hF; 
+            green <= 4'hF; 
+            blue <= 4'hF;
+        end
+        
+        // Text elements (light orange)
+        else if(
             // PONG
             // P
             (pixel_x >= 120 && pixel_x <= 140 && pixel_y >= 20 && pixel_y <= 190) || 
@@ -140,10 +162,10 @@ always @(posedge clk_d) begin
             (pixel_x >= 580 && pixel_x <= 620 && pixel_y >= 425 && pixel_y <= 435) ||
             (pixel_x >= 580 && pixel_x <= 620 && pixel_y >= 450 && pixel_y <= 460)
         ) begin
-            // Text color (white)
+            // Text color (light orange)
             red <= 4'hF; 
-            green <= 4'hF; 
-            blue <= 4'hF;
+            green <= 4'hA; 
+            blue <= 4'h0;
         end
     end
     else begin
